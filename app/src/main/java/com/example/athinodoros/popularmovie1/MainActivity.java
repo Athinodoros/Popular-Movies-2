@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
     Spinner mSpinner;
 
     public static final String URL_BASE = "http://api.themoviedb.org/3/movie/";
-    public static final String API_KEY = "32439a4da71be2c154731e20277cf56d"; //TODO: A API-key is needed here
+    public static final String API_KEY = ""; //TODO: A API-key is needed here
     public static final String PAGE = "page";
     public static final String ON_SAVE_INSTANSE = "callbacks";
     retrofit2.Call<FullResponseObject> call;

@@ -50,7 +50,10 @@ public class MyvideoRecyclerViewAdapter extends RecyclerView.Adapter<MyvideoRecy
             @Override
             public void onClick(View view) {
                 if (isAppInstalled("com.google.android.youtube")) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube://" + holder.mItem.getKey()));
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=" + holder.mItem.getKey()));
+                    if (intent.resolveActivity(context.getPackageManager()) != null) {
+                        context.startActivity(intent);
+                    }
                     context.startActivity(intent);
                 }
             }
