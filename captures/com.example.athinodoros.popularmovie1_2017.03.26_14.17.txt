@@ -1,0 +1,31 @@
+TASK com.example.athinodoros.popularmovie1 id=1871
+  ACTIVITY com.example.athinodoros.popularmovie1/.MainActivity dac9238 pid=5528
+    Local FragmentActivity beaa327 State:
+      mCreated=truemResumed=true mStopped=false mReallyStopped=false
+      mLoadersStarted=true
+    FragmentManager misc state:
+      mHost=android.support.v4.app.FragmentActivity$HostCallbacks@706c9bc
+      mContainer=android.support.v4.app.FragmentActivity$HostCallbacks@706c9bc
+      mCurState=5 mStateSaved=false mDestroyed=false
+    View Hierarchy:
+      com.android.internal.policy.PhoneWindow$DecorView{68ec9ff V.E..... ... 0,0-720,1280}
+        android.widget.LinearLayout{ab933df V.E..... ... 0,0-720,1280}
+          android.view.ViewStub{c23382c G.E..... ... 0,0-0,0 #10203ab android:id/action_mode_bar_stub}
+          android.widget.FrameLayout{42482f5 V.E..... ... 0,48-720,1280}
+            android.support.v7.widget.ActionBarOverlayLayout{47b045c V.E..... ... 0,0-720,1232 #7f0d004d app:id/decor_content_parent}
+              android.support.v7.widget.ContentFrameLayout{a1dcceb V.E..... ... 0,112-720,1232 #1020002 android:id/content}
+                android.widget.LinearLayout{df62205 V.E..... ... 0,0-720,1120}
+                  android.support.v7.widget.AppCompatTextView{508325a I.ED.... ... 0,0-503,164 #7f0d005e app:id/error_text_holder}
+                  android.widget.LinearLayout{bbd981 V.E..... ... 0,164-720,256 #7f0d005f app:id/spinner_and_title}
+                    android.support.v7.widget.AppCompatTextView{7071a26 V.ED.... ... 0,15-190,74}
+                    android.support.v7.widget.AppCompatSpinner{b2937b9 VFED..C. ... 222,0-506,92 #7f0d0060 app:id/sorting_spinner}
+                      android.support.v7.widget.AppCompatTextView{64aa6a0 V.ED.... ... 0,9-236,83 #7f0d008c app:id/spinner_item}
+                  android.widget.ScrollView{d222e7b VFED.V.. ... 0,256-720,1120}
+                    android.support.v7.widget.RecyclerView{91fdbc5 VFED.... ... 0,0-720,0 #7f0d0061 app:id/movie_recycle}
+              android.support.v7.widget.ActionBarContainer{28a4cc7 V.ED.... ... 0,0-720,112 #7f0d004e app:id/action_bar_container}
+                android.support.v7.widget.Toolbar{74961ee V.E..... ... 0,0-720,112 #7f0d004f app:id/action_bar}
+                  android.support.v7.widget.AppCompatTextView{37301e4 V.ED.... ... 32,29-291,83}
+                  android.support.v7.widget.ActionMenuView{265f7f5 V.E..... ... 640,0-720,112}
+                    android.support.v7.widget.ActionMenuPresenter$OverflowMenuButton{4441f73 VFED..CL ... 0,8-80,104}
+                android.support.v7.widget.ActionBarContextView{ce258d9 G.E..... ... 0,0-0,0 #7f0d0050 app:id/action_context_bar}
+        android.view.View{83e5c46 V.ED.... ... 0,0-720,48 #102002f android:id/statusBarBackground}

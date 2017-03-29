@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Popular Movie</string>
+    <string name="values_not_loaded">There has been an error trying \n to fetch more awesome movies :/ \n try again in a bit :)</string>
+    <string name="popular_value" translatable="false">popular</string>
+    <string name="top_rated_value" translatable="false">top_rated</string>
+    <string name="fav_value" translatable="false">favorites</string>
+    <string name="action_settings">Settings</string>
+    <string name="pop_label">Sort by Popularity</string>
+    <string name="rating_label">Sort by Rating</string>
+    <string name="fav_label">Show Favorites Only</string>
+    <string name="listing_options">Display Films by</string>
+    <string name="by" translatable="false">BY</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="movieItemParcel">myObject</string>
+    <string name="pagerState">pagerState</string>
+    <string name="reviews">reviews</string>
+    <string name="videos">videos</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="C:\Users\Athinodoros\Documents\GitHub\Popular-Movies-S1\PopularMovie\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="c82741bc129dd5f99f11a4ab8666ae24262053b6">
+        <dex dex="C:\Users\Athinodoros\Documents\GitHub\Popular-Movies-S1\PopularMovie\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_d79ad3bfc517e076274afcab4b3ff15d36821269\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Athinodoros\Documents\GitHub\Popular-Movies-S1\PopularMovie\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="8dab9db10785ef3300ac3d590de50db900c980ef">
+        <dex dex="C:\Users\Athinodoros\Documents\GitHub\Popular-Movies-S1\PopularMovie\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_90c8a9e2e179f49e072dea447cc108c2700217fd\classes.dex" />
+    </item>
+
+</items>

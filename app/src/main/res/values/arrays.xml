@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- COMPLETED (3) Add a res->values->arrays.xml file which contains two arrays, one for
+    labels and one for values. The arrays should contain strings found in this file-->
+<resources>
+    <!-- Label ordering must match values -->
+    <string-array name="pref_sorting_labels">
+        <item>@string/pop_label</item>
+        <item>@string/rating_label</item>
+        <item>@string/fav_label</item>
+    </string-array>
+
+    <string-array name="pref_sorting_values">
+        <item>@string/popular_value</item>
+        <item>@string/top_rated_value</item>
+        <item>@string/fav_value</item>
+    </string-array>
+</resources>
