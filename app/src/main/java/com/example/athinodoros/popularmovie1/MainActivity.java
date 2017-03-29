@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(getString(R.string.by), getString(R.string.popular_value)).equals(getString(R.string.fav_value))) {
+                if (!PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(getString(R.string.by), getString(R.string.popular_value)).equals(getString(R.string.fav_value))) {
 
                     int lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
                     if (lastVisibleItem > movieAdapter.getItemCount() - 5) {
