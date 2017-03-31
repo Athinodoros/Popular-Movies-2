@@ -3,10 +3,14 @@ package com.example.athinodoros.popularmovie1;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
@@ -42,10 +46,14 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.movieClickListener, Spinner.OnItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
-
+    private Parcelable recyclerViewState;
+    private static Bundle mBundleRecyclerViewState;
     private static final String MOVIES_CASHED = "allMovies";
     private static final String LIST_STATE = "listState";
     private static final String SAVED_LAYOUT_MANAGER = "layout_state";
+    private static final String PAGE_INDEX = "page";
+    private static final String LAST_POSITION = "position";
+    private static final String LIST_STATE_KEY = "state_key";
     @BindView(R.id.error_text_holder)
     TextView errorHolder;
     @BindView(R.id.movie_recycle)
@@ -55,12 +63,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
     @BindView(R.id.sorting_spinner)
     Spinner mSpinner;
 
-    public static final String URL_BASE = "http://api.themoviedb.org/3/movie/";
-    public static final String API_KEY = ""; //TODO: A API-key is needed here
-    public static final String PAGE = "page";
-    public static final String ON_SAVE_INSTANSE = "callbacks";
-    retrofit2.Call<FullResponseObject> call;
+    public static final String API_KEY = "32439a4da71be2c154731e20277cf56d"; //TODO: A API-key is needed here
 
+    retrofit2.Call<FullResponseObject> call;
 
     private ArrayList<String> spinnerOptions = new ArrayList<>();
     public static final String ID = "ID";
@@ -74,15 +79,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
     public static final String POPULARITY = "POPULARITY";
     public static final String VOTE_COUNT = "VOTE_COUNT";
     public static final String VOTE_AVRG = "VOTE_AVRG";
-    LinearLayoutManager mLayoutManager;
+    GridLayoutManager mLayoutManager;
     MovieBackEndInterface apiService;
     SharedPreferences sharedPreferences;
     MovieAdapter movieAdapter;
-    int page = 1;
+    int page = -1;
     FullResponseObject moviesR;
     private Parcelable mListState;
     private String SPINNER_STATE = "spinnerState";
     private Parcelable layoutManagerSavedState;
+    int position = 1;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +102,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
         ButterKnife.bind(MainActivity.this);
 
         apiService = ApiClient.getClient().create(MovieBackEndInterface.class);
-        movieAdapter = new MovieAdapter(this, this);
+        if (movieAdapter == null)
+            movieAdapter = new MovieAdapter(this, this);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         if (sharedPreferences.getString(getString(R.string.by), null) == null)
@@ -101,23 +113,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
         spinnerOptions.add(getString(R.string.popular_value));
         spinnerOptions.add(getString(R.string.top_rated_value));
         spinnerOptions.add(getString(R.string.fav_value));
-        if (mLayoutManager == null)
-            mLayoutManager = new GridLayoutManager(this, calculateNoOfColumns(this), GridLayoutManager.VERTICAL, false);
+
+        mLayoutManager = new GridLayoutManager(this, calculateNoOfColumns(this), GridLayoutManager.VERTICAL, false);
 
         movieRecyclerView.setLayoutManager(mLayoutManager);
         movieRecyclerView.setAdapter(movieAdapter);
         movieRecyclerView.setHasFixedSize(true);
-        ArrayList<MovieItem> demoData = new ArrayList<>();
+        ArrayList<MovieItem> demoData = demoData = new ArrayList<>();
         ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, spinnerOptions);
         mSpinner.setAdapter(stringArrayAdapter);
         String perSel = sharedPreferences.getString(getString(R.string.by), null);
-        if(perSel==null){
+        if (perSel == null) {
             Toast.makeText(this, "Please select sorting again!", Toast.LENGTH_SHORT).show();
-        }else if (perSel.equals(getString(R.string.popular_value))){
+        } else if (perSel.equals(getString(R.string.popular_value))) {
             mSpinner.setSelection(0);
-        }else if (perSel.equals(getString(R.string.top_rated_value))){
+        } else if (perSel.equals(getString(R.string.top_rated_value))) {
             mSpinner.setSelection(1);
-        }else if (perSel.equals(getString(R.string.fav_value))){
+        } else if (perSel.equals(getString(R.string.fav_value))) {
             mSpinner.setSelection(2);
         }
         movieAdapter.setMovieData(demoData);
@@ -125,28 +137,105 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
         errorHolder.setVisibility(View.INVISIBLE);
         errorHolder.setText(com.example.athinodoros.popularmovie1.R.string.values_not_loaded);
         mSpinner.setOnItemSelectedListener(this);
+        movieRecyclerView.addOnScrollListener(mScrollListener);
+        if (savedInstanceState != null) {
+            mLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(LIST_STATE));
+            movieRecyclerView.getLayoutManager().scrollToPosition(savedInstanceState.getInt(LAST_POSITION));
+        }
 
-        movieRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (!PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(getString(R.string.by), getString(R.string.popular_value)).equals(getString(R.string.fav_value))) {
-
-                    int lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
-                    if (lastVisibleItem > movieAdapter.getItemCount() - 5) {
-                        getMovies(true);
-                    }
-                }
-            }
-        });
         if (isOnline())
             getMovies(false);
         else {
             showError();
         }
+        if (savedInstanceState != null)
+            position = savedInstanceState.getInt(LAST_POSITION);
+        if (mBundleRecyclerViewState != null)
+            movieRecyclerView.getLayoutManager().onRestoreInstanceState(mBundleRecyclerViewState.getParcelable(LIST_STATE));
+        movieRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mBundleRecyclerViewState != null)
+                    movieRecyclerView.scrollToPosition(mBundleRecyclerViewState.getInt(LAST_POSITION));
 
+            }
+        }, 1500);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String by = sharedPreferences.getString(getString(R.string.by), null);
+        if (by != null && by.equals(getString(R.string.fav_value))) {
+            movieAdapter.emptyList();
+            getFavorites();
+            movieAdapter.notifyDataSetChanged();
+        }
+        if (mBundleRecyclerViewState != null) {
+
+            Parcelable listState = mBundleRecyclerViewState.getParcelable(LIST_STATE);
+            movieRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
+        }
+        //restoreRecycler();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        position = mLayoutManager.findFirstVisibleItemPosition();
+        moviesR = movieAdapter.getMovieData(0);
+        mBundleRecyclerViewState = new Bundle();
+        mListState = movieRecyclerView.getLayoutManager().onSaveInstanceState();
+        mBundleRecyclerViewState.putParcelable(LIST_STATE, mListState);
+        mBundleRecyclerViewState.putInt(LAST_POSITION, position);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (movieAdapter.getItemCount() == 0)
+            movieAdapter.setMovieData(moviesR.getResults());
+        movieAdapter.notifyDataSetChanged();
+        movieRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                movieRecyclerView.scrollToPosition(position);
+
+            }
+        }, 900);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (movieAdapter.getItemCount() == 0 && moviesR != null)
+            movieAdapter.setMovieData(moviesR.getResults());
+        movieAdapter.notifyDataSetChanged();
+        movieRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                movieRecyclerView.scrollToPosition(position);
+
+            }
+        }, 900);
+    }
+
+    RecyclerView.OnScrollListener mScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+
+            if (PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(getString(R.string.by), getString(R.string.popular_value)).equals(getString(R.string.fav_value))) {
+            } else {
+
+                int lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+                if (lastVisibleItem > movieAdapter.getItemCount() - 5) {
+                    getMovies(true);
+                }
+            }
+        }
+    };
 
     public static int calculateNoOfColumns(Context context) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
@@ -236,9 +325,18 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
         intent.putExtra(POPULARITY, movie.getPopularity());
         intent.putExtra(VOTE_COUNT, movie.getVote_count());
         intent.putExtra(VOTE_AVRG, movie.getVote_average());
-        onSaveInstanceState(new Bundle());
+
         startActivity(intent);
 //        Toast.makeText(this, movieID, Toast.LENGTH_SHORT).show();
+    }
+
+
+    public void restoreRecycler() {
+        if (mBundleRecyclerViewState != null) {
+            movieRecyclerView.getLayoutManager().onRestoreInstanceState(mBundleRecyclerViewState.getParcelable(LIST_STATE));
+            movieRecyclerView.scrollToPosition(position);
+            Log.d("restored index", String.valueOf(mLayoutManager.findFirstVisibleItemPosition()));
+        }
     }
 
     @Override
@@ -261,84 +359,43 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
 
 
     public void getMovies(boolean isAdding) {
-
         if (sharedPreferences.getString(getString(R.string.by), null).equals(getString(R.string.fav_value)) && !isAdding) {
             getFavorites();
             Log.e("FUCKKKKKKKKKKKK", "THE METHOD IS CALLED");
             movieAdapter.notifyDataSetChanged();
         } else {
+            if (movieRecyclerView.getLayoutManager().getItemCount() > 0)
+                page = movieRecyclerView.getLayoutManager().getItemCount() / 20 + 1;
+            else
+                page = 1;
             call = apiService.getMovies(sharedPreferences.getString(getString(R.string.by), getString(R.string.popular_value)), API_KEY, page);
-            page++;
-            call.enqueue(new Callback<FullResponseObject>() {
-                @Override
-                public void onResponse(retrofit2.Call<FullResponseObject> call, Response<FullResponseObject> response) {
-                    if (response.body() != null)
-                        if (response.body().getResults() != null) {
-                            moviesR = response.body();
-                            movieAdapter.setMovieData(moviesR.getResults());
-                            movieAdapter.notifyDataSetChanged();
-                            showResults();
-                        } else
-                            showError();
-//                    showResults();
+            if (!call.isExecuted())
+                call.enqueue(new Callback<FullResponseObject>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<FullResponseObject> call, Response<FullResponseObject> response) {
+                        if (response.body() != null)
+                            if (response.body().getResults() != null) {
+                                moviesR = response.body();
+                                movieAdapter.setMovieData(moviesR.getResults());
+                                movieAdapter.notifyDataSetChanged();
+                                showResults();
+                            } else
+                                showError();
+                    }
 
-                }
-
-                @Override
-                public void onFailure(retrofit2.Call<FullResponseObject> call, Throwable t) {
-                    showError();
-                }
-            });
+                    @Override
+                    public void onFailure(retrofit2.Call<FullResponseObject> call, Throwable t) {
+                        showError();
+                    }
+                });
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-//        Parcelable wrapped = Parcels.wrap(FullResponseObject.class, movieAdapter.getMovieData(page));
-//        outState.putParcelable(MOVIES_CASHED, wrapped);
-//        mListState = mLayoutManager.onSaveInstanceState();
-//        outState.putParcelable(LIST_STATE, mListState);
-//        outState.putParcelable(SPINNER_STATE, mSpinner.onSaveInstanceState());
-        outState.putParcelable(SAVED_LAYOUT_MANAGER, movieRecyclerView.getLayoutManager().onSaveInstanceState());
-        super.onSaveInstanceState(outState);
-
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-
-        movieAdapter.setMovieData(new ArrayList<MovieItem>());
-        if (mListState != null) {
-            mLayoutManager.onRestoreInstanceState(mListState);
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            layoutManagerSavedState = (savedInstanceState).getParcelable(SAVED_LAYOUT_MANAGER);
-//            moviesR = Parcels.unwrap(savedInstanceState.getParcelable(MOVIES_CASHED));
-//            movieAdapter.setMovieData(moviesR.getResults());
-//
-//            if (savedInstanceState.getParcelable(LIST_STATE) != null)
-//                Parcels.unwrap(savedInstanceState.getParcelable(MOVIES_CASHED));
-//            mListState = savedInstanceState.getParcelable(LIST_STATE);
-//            mLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(LIST_STATE));
-//            movieRecyclerView.getLayoutManager().onRestoreInstanceState(savedInstanceState.getParcelable(LIST_STATE));
-////            movieRecyclerView.setLayoutManager(mLayoutManager);
-////            mSpinner.onRestoreInstanceState(savedInstanceState.getParcelable(SPINNER_STATE));
-
-        }
-        super.onRestoreInstanceState(savedInstanceState);
-    }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         page = 0;
-        String currentChoice = sharedPreferences.getString("BY", getString(R.string.popular_value));
+        String currentChoice = sharedPreferences.getString(getString(R.string.by), getString(R.string.popular_value));
         if (s.equals("BY")) {
             if (currentChoice.equals(getString(R.string.popular_value))) {
                 mSpinner.setSelection(0, false);
@@ -355,8 +412,42 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.movi
 
             }
         }
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(LIST_STATE, mLayoutManager.onSaveInstanceState());
+        outState.putInt(LAST_POSITION, position);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.e("CalledLeme", "POAK");
+        mLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(LIST_STATE));
+        position = savedInstanceState.getInt(LAST_POSITION);
+
+
+        movieAdapter.notifyDataSetChanged();
+        movieRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                movieRecyclerView.scrollToPosition(position);
+//                movieRecyclerView.smoothScrollToPosition(movieRecyclerView,null,position);
+            }
+        }, 1000);
+//        mLayoutManager.scrollToPosition(position);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        call.cancel();
     }
 
 
 }
+
+

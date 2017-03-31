@@ -11,18 +11,12 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.RatingBar;
-import android.widget.TextView;
+import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.example.athinodoros.popularmovie1.data.PopularContract;
@@ -116,6 +110,12 @@ public class MovieDetails extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,19 +123,20 @@ public class MovieDetails extends AppCompatActivity {
         ButterKnife.bind(this);
 
 
-        tabLayout.setupWithViewPager(viewPager);
-
         //db init
 //        PopularHelper popularHelper = new PopularHelper(this);
 //        SQLiteDatabase mDB = popularHelper.getWritableDatabase();
 
         MovieBackEndInterface apiService = ApiClient.getClient().create(MovieBackEndInterface.class);
-        id = getIntent().getExtras().getInt(MainActivity.ID);
-        title = getIntent().getExtras().getString(MainActivity.TITLE);
-        path = getIntent().getExtras().getString(MainActivity.POSTER_PATH);
-        synopsis = getIntent().getExtras().getString(MainActivity.OVERVIEW);
-        ratingIn = getIntent().getExtras().getFloat(MainActivity.VOTE_AVRG);
-        release = getIntent().getExtras().getString(MainActivity.R_DATE);
+        if (getIntent() != null && getIntent().hasExtra(MainActivity.ID)) {
+
+            id = getIntent().getExtras().getInt(MainActivity.ID);
+            title = getIntent().getExtras().getString(MainActivity.TITLE);
+            path = getIntent().getExtras().getString(MainActivity.POSTER_PATH);
+            synopsis = getIntent().getExtras().getString(MainActivity.OVERVIEW);
+            ratingIn = getIntent().getExtras().getFloat(MainActivity.VOTE_AVRG);
+            release = getIntent().getExtras().getString(MainActivity.R_DATE);
+        }
         movieItem.setId(id);
         movieItem.setTitle(title);
         movieItem.setPoster_path(path);
@@ -146,6 +147,7 @@ public class MovieDetails extends AppCompatActivity {
 
         callVideo = apiService.getVideos(id, MainActivity.API_KEY);
 
+        tabLayout.setupWithViewPager(viewPager);
 
         callReviews = apiService.getReviews(id, MainActivity.API_KEY);
         callReviews.enqueue(new Callback<ReviewResponse>() {
@@ -173,7 +175,6 @@ public class MovieDetails extends AppCompatActivity {
         });
 
 
-
     }
 
     @Override
@@ -184,7 +185,7 @@ public class MovieDetails extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        outState.putParcelable(getString(R.string.pagerState),viewPager.onSaveInstanceState());
+        outState.putParcelable(getString(R.string.pagerState), viewPager.onSaveInstanceState());
         super.onSaveInstanceState(outState, outPersistentState);
     }
 }
